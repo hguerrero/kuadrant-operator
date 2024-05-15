@@ -439,7 +439,7 @@ esac
 
 # Kind create cluster
 info "Creating a new Kubernetes cluster... 🌟"
-${KIND_BIN} create cluster --name ${KUADRANT_CLUSTER_NAME} --config=- <<<"$(curl -s ${KUADRANT_REPO_RAW}/utils/kind-cluster.yaml)"
+${KIND_BIN} create cluster --name ${KUADRANT_CLUSTER_NAME} --config=../utils/kind-cluster.yaml
 kubectl config use-context kind-${KUADRANT_CLUSTER_NAME}
 success "Kubernetes cluster created successfully."
 
@@ -480,16 +480,16 @@ kubectl -n cert-manager wait --for=condition=Available deployments --all --timeo
 setupClusterIssuer
 success "cert-manager installed successfully."
 
-# Install metallb
-info "Installing MetalLB... 🏗️"
-{
-  kubectl apply -k ${KUADRANT_METALLB_KUSTOMIZATION} 2>&1
-} | grep -v "Warning: .* deprecated" || true
-kubectl -n metallb-system wait --for=condition=Available deployments controller --timeout=300s
-kubectl -n metallb-system wait --for=condition=ready pod --selector=app=metallb --timeout=60s
-info "Generating IP address pool for MetalLB..."
-generate_ip_address_pool "kind" "${YQ_BIN}" "${SUBNET_OFFSET}" | kubectl apply -n metallb-system -f -
-success "MetalLB installed and IP address pool generated successfully."
+# # Install metallb
+# info "Installing MetalLB... 🏗️"
+# {
+#   kubectl apply -k ${KUADRANT_METALLB_KUSTOMIZATION} 2>&1
+# } | grep -v "Warning: .* deprecated" || true
+# kubectl -n metallb-system wait --for=condition=Available deployments controller --timeout=300s
+# kubectl -n metallb-system wait --for=condition=ready pod --selector=app=metallb --timeout=60s
+# info "Generating IP address pool for MetalLB..."
+# generate_ip_address_pool "kind" "${YQ_BIN}" "${SUBNET_OFFSET}" | kubectl apply -n metallb-system -f -
+# success "MetalLB installed and IP address pool generated successfully."
 
 # Install kuadrant
 info "Installing Kuadrant in ${KUADRANT_CLUSTER_NAME}..."
@@ -536,7 +536,7 @@ info "  - a Kuadrant namespace 'kuadrant-system'"
 info "  - Gateway API"
 info "  - Istio installed $([ "$ISTIO_INSTALL_SAIL" = true ] && echo "via Sail" || echo "without Sail") as a Gateway API provider"
 info "  - cert-manager"
-info "  - MetalLB with configured IP address pool"
+# info "  - MetalLB with configured IP address pool"
 info "  - Kuadrant components and a sample configuration"
 if [ ! -z "$DNS_PROVIDER" ]; then
   info "  - DNS provider set to '${DNS_PROVIDER}'"
